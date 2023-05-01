@@ -10,7 +10,7 @@ COPY dist/requirements.txt /app/dist/requirements.txt
 RUN pip install -r /app/dist/requirements.txt
 
 # project
-COPY dist/*.whl /app/dist/
+COPY dist/"$IMAGE_NAME"*.whl /app/dist/
 RUN pip install /app/dist/"$IMAGE_NAME"*.whl
 
 ENTRYPOINT ["python", "-m", "$IMAGE_NAME"]
