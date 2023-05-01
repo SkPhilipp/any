@@ -12,6 +12,7 @@ Requirements:
 - A `bin/run` file.
 - Default poetry functionality of `poetry install` and `poetry build` works.
 - Default poetry folder of `/dist` is used as build directory.
+- Default poetry file format of `*.whl` is used as build artifact.
 
 ## Installation
 
