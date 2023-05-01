@@ -9,10 +9,10 @@ Tool to support the process of quickly building Docker images from standard proj
 Requirements:
 
 - A `pyproject.toml` file.
-- A `bin/run` file.
-- Default poetry functionality of `poetry install` and `poetry build` works.
-- Default poetry folder of `/dist` is used as build directory.
-- Default poetry file format of `*.whl` is used as build artifact.
+  - Project folder's name must match the name defined in `pyproject.toml`.
+- Standard commands of `poetry export` and `poetry build` are functional.
+- Standard folder of `/dist` is used as build directory.
+- Standard file format of `*.whl` is used as build artifact.
 
 ## Installation
 

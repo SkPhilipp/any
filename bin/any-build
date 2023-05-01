@@ -24,7 +24,7 @@ auto_any_dockerfile=$(cd "$auto_any_dir" && cd .. && pwd)/Dockerfile.poetry
   rm -rf dist/*
   poetry build
   poetry export --without-hashes --without dev > dist/requirements.txt
-  docker build -f "$auto_any_dockerfile" . -t "$image_tag"
+  docker build --build-arg IMAGE_NAME="$image_name" -f "$auto_any_dockerfile" . -t "$image_tag"
 
   # write the image tag to dist
   echo "$image_tag" > dist/image_tag

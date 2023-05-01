@@ -1,5 +1,8 @@
 FROM python:3.11
 
+ARG IMAGE_NAME
+ENV IMAGE_NAME=${IMAGE_NAME}
+
 WORKDIR /app
 
 # dependencies
@@ -8,7 +11,6 @@ RUN pip install -r /app/dist/requirements.txt
 
 # project
 COPY dist/*.whl /app/dist/
-COPY bin /app/bin
-RUN pip install /app/dist/*.whl
+RUN pip install /app/dist/"$IMAGE_NAME"*.whl
 
-ENTRYPOINT ["bin/run"]
+ENTRYPOINT ["python", "-m", "$IMAGE_NAME"]
