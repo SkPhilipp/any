@@ -8,13 +8,29 @@ command=$1
 if [ -z "$command" ]; then
   echo "Usage: any <command>" >&2
   echo "  Commands:" >&2
-  echo "    build" >&2
+  echo "    deploy" >&2
+  echo "    home" >&2
+  echo "    install" >&2
+  echo "    project" >&2
+  echo "    undeploy" >&2
   exit 1
 fi
 
-if [ "$command" = "build" ]; then
+if [ "$command" = "deploy" ]; then
   shift
-  any-build "$@"
+  any-deploy "$@"
+elif [ "$command" = "home" ]; then
+  shift
+  any-home "$@"
+elif [ "$command" = "install" ]; then
+  shift
+  any-install "$@"
+elif [ "$command" = "project" ]; then
+  shift
+  any-project "$@"
+elif [ "$command" = "undeploy" ]; then
+  shift
+  any-undeploy "$@"
 else
   echo "Unknown command: $command" >&2
   exit 1

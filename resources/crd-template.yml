@@ -1,0 +1,11 @@
+---
+apiVersion: release-engineers.com/v1
+kind: Installation
+metadata:
+  name: ""
+  namespace: "any"
+spec:
+  project: ""
+  branch: ""
+  commit: ""
+  namespace: ""

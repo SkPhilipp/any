@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+ANY_HOME=$(any home)
+ANY_PROJECT=$(any project)
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+commit=$(git rev-parse HEAD)
+sha256=$(echo -n "$ANY_PROJECT:$branch" | shasum -a 256 | head -c 32)
+
+kubectl delete --namespace any installation "$sha256"

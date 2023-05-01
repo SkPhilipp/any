@@ -1,6 +1,31 @@
 # any
 
-Tool to support the process of quickly building Docker images from standard project layouts.
+Kubernetes Operator facilitating the quick building and deployment of projects.
+
+## Installation
+
+- Add `./bin/` to your `PATH`.
+- Run `any install`.
+
+Run `kopf run ./any/__main__.py --verbose` to start the operator.
+
+## Commands
+
+### Install
+
+```bash
+any install
+```
+
+Installs the Any operator and CRDs to a Kubernetes cluster.
+
+### Deploy
+
+```bash
+any deploy
+```
+
+Deploys a project to a Kubernetes cluster running Any.
 
 ## Supported Layouts
 
@@ -13,18 +38,3 @@ Requirements:
 - Standard commands of `poetry export` and `poetry build` are functional.
 - Standard folder of `/dist` is used as build directory.
 - Standard file format of `*.whl` is used as build artifact.
-
-## Installation
-
-Add `./bin/` to your `PATH`.
-
-## Usage
-
-To build a project run the following command from any directory within the project:
-
-```bash
-any build
-```
-
-This builds a Docker image containing your dependencies and build artifact.
-The Docker image's tag is written to a file named `image_tag` in the associated layout's build directory.

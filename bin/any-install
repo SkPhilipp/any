@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+ANY_HOME=$(any home)
+
+kubectl config use-context minikube
+kubectl apply -f "$ANY_HOME"/resources/crd.yml
+kubectl create namespace any
