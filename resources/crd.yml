@@ -23,7 +23,7 @@ spec:
             spec:
               type: object
               properties:
-                project:
+                repository:
                   type: string
                 branch:
                   type: string

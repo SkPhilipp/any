@@ -10,8 +10,8 @@ if [ -z "$command" ]; then
   echo "  Commands:" >&2
   echo "    deploy" >&2
   echo "    home" >&2
-  echo "    install" >&2
-  echo "    project" >&2
+  echo "    setup" >&2
+  echo "    start" >&2
   echo "    undeploy" >&2
   exit 1
 fi
@@ -20,14 +20,14 @@ if [ "$command" = "deploy" ]; then
   shift
   any-deploy "$@"
 elif [ "$command" = "home" ]; then
+  (
+    cd $(dirname "${BASH_SOURCE[0]}")
+    cd ..
+    pwd
+  )
+elif [ "$command" = "start" ]; then
   shift
-  any-home "$@"
-elif [ "$command" = "install" ]; then
-  shift
-  any-install "$@"
-elif [ "$command" = "project" ]; then
-  shift
-  any-project "$@"
+  any-start "$@"
 elif [ "$command" = "undeploy" ]; then
   shift
   any-undeploy "$@"

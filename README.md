@@ -1,23 +1,13 @@
 # any
 
-Kubernetes Operator facilitating the quick building and deployment of projects.
+Kubernetes Operator facilitating the quick building and deployment of repositories.
 
 ## Installation
 
 - Add `./bin/` to your `PATH`.
-- Run `any install`.
-
-Run `kopf run ./any/__main__.py --verbose` to start the operator.
+- Run `any start` to create CRDs, the `any` namespace and start the operator.
 
 ## Commands
-
-### Install
-
-```bash
-any install
-```
-
-Installs the Any operator and CRDs to a Kubernetes cluster.
 
 ### Deploy
 
@@ -25,7 +15,7 @@ Installs the Any operator and CRDs to a Kubernetes cluster.
 any deploy
 ```
 
-Deploys a project to a Kubernetes cluster running Any.
+Deploys a repository to a Kubernetes cluster running Any.
 
 ## Supported Layouts
 
@@ -34,7 +24,7 @@ Deploys a project to a Kubernetes cluster running Any.
 Requirements:
 
 - A `pyproject.toml` file.
-  - Project folder's name must match the name defined in `pyproject.toml`.
+    - Repository folder's name must match the name defined in `pyproject.toml`.
 - Standard commands of `poetry export` and `poetry build` are functional.
 - Standard folder of `/dist` is used as build directory.
 - Standard file format of `*.whl` is used as build artifact.

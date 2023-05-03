@@ -1,16 +1,15 @@
 FROM python:3.11
 
-ARG IMAGE_NAME
-ENV IMAGE_NAME=${IMAGE_NAME}
-
+# --- dependencies
 WORKDIR /app
+ADD lib /app/lib
+ENV PYTHONPATH=/app/lib/python3.11/site-packages/:$PYTHONPATH
 
-# dependencies
-COPY dist/requirements.txt /app/dist/requirements.txt
-RUN pip install -r /app/dist/requirements.txt
+# --- project
+ARG PYTHON_MODULE
+ENV PYTHON_MODULE=${PYTHON_MODULE}
+ADD dist/*.whl /app/dist/
+RUN bash -c "python -m pip install --no-dependencies /app/dist/*.whl"
+RUN echo "python -m $PYTHON_MODULE" > "/app/entrypoint.sh"
 
-# project
-COPY dist/"$IMAGE_NAME"*.whl /app/dist/
-RUN pip install /app/dist/"$IMAGE_NAME"*.whl
-
-ENTRYPOINT ["python", "-m", "$IMAGE_NAME"]
+ENTRYPOINT ["bash", "/app/entrypoint.sh"]

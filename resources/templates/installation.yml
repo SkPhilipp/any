@@ -2,10 +2,12 @@
 apiVersion: release-engineers.com/v1
 kind: Installation
 metadata:
+  annotations:
+    any-managed: "true"
   name: ""
   namespace: "any"
 spec:
-  project: ""
+  repository: ""
   branch: ""
   commit: ""
   namespace: ""
