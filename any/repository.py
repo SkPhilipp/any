@@ -2,8 +2,9 @@
 import os
 import re
 import subprocess
+import importlib.resources as pkg_resources
 
-from any.config import ANY_HOME, Directory
+from any.config import Directory
 
 
 class Repository(object):
@@ -41,6 +42,7 @@ class Repository(object):
         return f"{self.repository_id()}:{self.commit}"
 
     def reset(self):
+        print("--- resetting Git repository")
         directory_repository = Directory.repository(self.repository_id())
         directory_git = os.path.join(directory_repository, ".git")
 
@@ -54,6 +56,7 @@ class Repository(object):
         os.system(f"git -C '{directory_repository}' reset --hard '{self.commit}'")
 
     def build_artifact(self):
+        print("--- building Python artifact")
         directory_repository = Directory.repository(self.repository_id())
         directory_environment = Directory.environment(self.repository_id())
         os.system(f"docker run --rm \
@@ -62,9 +65,11 @@ class Repository(object):
             any-build-poetry:latest")
 
     def build_image(self):
+        print("--- building Docker image")
         directory_project = Directory.project(self.repository_id())
-        image_dockerfile = os.path.join(ANY_HOME, "Dockerfile.image-poetry")
-        os.system(f"docker build -f '{image_dockerfile}' '{directory_project}' -t '{self.docker_image()}'")
+        image_dockerfile_generator = pkg_resources.as_file(pkg_resources.files("any.resources").joinpath("Dockerfile.image-poetry"))
+        with image_dockerfile_generator as image_dockerfile:
+            os.system(f"docker build -f '{image_dockerfile}' '{directory_project}' -t '{self.docker_image()}'")
 
     def __str__(self):
         return f"{self.repository}({self.branch}@{self.commit})"

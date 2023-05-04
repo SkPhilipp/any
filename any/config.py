@@ -1,14 +1,13 @@
 import os
 
 ANY_CACHE = os.path.join(os.environ['HOME'], ".any")
-ANY_HOME = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 
 class Directory:
     @staticmethod
-    def project(repository_id):
+    def project(repository_id="any"):
         """
-        Path to the project root directory for the given repository_id.
+        Path to the project root directory for the given repository_id, or the default "any" project.
         :param repository_id:
         :return:
         """
