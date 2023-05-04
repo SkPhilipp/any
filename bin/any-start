@@ -8,6 +8,7 @@ ANY_HOME=$(any home)
 (
     cd "$ANY_HOME"
     kubectl config use-context minikube
+    eval $(minikube docker-env)
     kubectl apply -f "$ANY_HOME"/resources/crd.yml
     kubectl apply -f "$ANY_HOME"/resources/namespace.yml
     kopf run ./any/__main__.py

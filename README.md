@@ -7,6 +7,8 @@ Kubernetes Operator facilitating the quick building and deployment of repositori
 - Add `./bin/` to your `PATH`.
 - Run `any start` to create CRDs, the `any` namespace and start the operator.
 
+To run it locally, try Minikube.
+
 ## Commands
 
 ### Deploy
