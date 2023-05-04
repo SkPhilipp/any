@@ -28,5 +28,3 @@ Requirements:
 - A `pyproject.toml` file.
     - Repository folder's name must match the name defined in `pyproject.toml`.
 - Standard commands of `poetry export` and `poetry build` are functional.
-- Standard folder of `/dist` is used as build directory.
-- Standard file format of `*.whl` is used as build artifact.
