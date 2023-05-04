@@ -1,38 +1,18 @@
 #!/usr/bin/env python3
 
 from any.repository import Repository
-import kopf
-import logging
+import subprocess
 
 
-@kopf.on.create('installation')
-@kopf.on.resume('installation')
-def fn_create(body, **_):
-    logging.info(f"create of {body['metadata']['name']}")
-    spec = body['spec']
-    repository = spec['repository']
-    branch = spec['branch']
-    commit = spec['commit']
-
-    logging.info(f"create of {repository} {branch} {commit}")
-    r = Repository(repository, branch, commit)
-    r.reset()
-    r.build_artifact()
-    r.build_image()
+def main():
+    local_repository = subprocess.check_output("git remote get-url origin", shell=True).decode("utf-8").strip()
+    local_branch = subprocess.check_output("git rev-parse --abbrev-ref HEAD", shell=True).decode("utf-8").strip()
+    local_commit = subprocess.check_output("git rev-parse HEAD", shell=True).decode("utf-8").strip()
+    repository = Repository(local_repository, local_branch, local_commit)
+    repository.reset()
+    repository.build_artifact()
+    repository.build_image()
 
 
-@kopf.on.update('installation')
-def fn_update(spec, old, new, diff, **_):
-    logging.info(f"update of {body['metadata']['name']}")
-    rebuild = 'repository' in diff or 'branch' in diff or 'commit' in diff
-    if not rebuild:
-        return
-
-    repository = spec['repository']
-    branch = spec['branch']
-    commit = spec['commit']
-
-    r = Repository(repository, branch, commit)
-    r.reset()
-    r.build_artifact()
-    r.build_image()
+if __name__ == "__main__":
+    main()

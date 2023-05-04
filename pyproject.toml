@@ -9,11 +9,10 @@ license = "SSPL-1.0"
 classifiers = ["Private :: Do not Upload"]
 
 [tool.poetry.scripts]
-event2api = "any.__main__:main"
+any = "any.__main__:main"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-kopf = "^1.36.0"
 
 [build-system]
 requires = ["poetry-core"]
