@@ -25,8 +25,5 @@ Performs the following steps:
 
 ### Python Poetry
 
-Requirements:
-
-- A `pyproject.toml` file.
-    - Repository folder's name must match the name defined in `pyproject.toml`.
-- Standard commands of `poetry export` and `poetry build` are functional.
+Requires a `pyproject.toml` file. Note that standard commands of `poetry export` and `poetry build` are functional, and the built wheel starts with
+the Python module's name.
