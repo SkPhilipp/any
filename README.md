@@ -6,7 +6,7 @@ Build server tool for getting Git repositories built as Docker images as fast as
 
 ```bash
 poetry build --format wheel
-pip install dist/any-0.1.0-py3-none-any.whl
+pip install dist/any-1.0.0-py3-none-any.whl
 ```
 
 ## Commands

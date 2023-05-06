@@ -64,12 +64,16 @@ class Repository(object):
             --volume '{directory_environment}:/root/.cache/pypoetry/virtualenvs/' \
             any-build-poetry:latest")
 
-    def build_image(self):
+    def build_image(self, additional_tag):
         print("--- building Docker image")
         directory_project = Directory.project(self.repository_id())
         image_dockerfile_generator = pkg_resources.as_file(pkg_resources.files("any.resources").joinpath("Dockerfile.image-poetry"))
         with image_dockerfile_generator as image_dockerfile:
-            os.system(f"docker build -f '{image_dockerfile}' '{directory_project}' -t '{self.docker_image()}'")
+            tags = [self.docker_image()]
+            if additional_tag:
+                tags.append(additional_tag)
+            tags = " ".join([f"-t {tag}" for tag in tags])
+            os.system(f"docker build -f '{image_dockerfile}' '{directory_project}' {tags}")
 
     def __str__(self):
         return f"{self.repository}({self.branch}@{self.commit})"
