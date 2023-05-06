@@ -30,13 +30,23 @@ def build(organization_repository: str = None, branch: str = None, commit: str =
     local_commit = default_commit(commit)
     repository = Repository(local_organization, local_repository, local_branch, local_commit, tag)
     repository.reset()
-    repository.build_artifact()
-    repository.build_image()
+    repository.build_poetry_artifact()
+    repository.build_docker_image()
+
+
+def deploy(organization_repository: str = None, branch: str = None, commit: str = None, tag: str = None):
+    local_organization, local_repository = default_organization_repository(organization_repository)
+    local_branch = default_branch(branch)
+    local_commit = default_commit(commit)
+    repository = Repository(local_organization, local_repository, local_branch, local_commit, tag)
+    repository.reset()
+    repository.deploy()
 
 
 def main():
     fire.Fire({
-        'build': build
+        'build': build,
+        'deploy': deploy
     })
 
 

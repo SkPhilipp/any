@@ -36,8 +36,8 @@ class Repository(object):
         os.system(f"git -C '{directory_repository}' fetch origin '{self.branch}'")
         os.system(f"git -C '{directory_repository}' reset --hard '{self.commit}'")
 
-    def build_artifact(self):
-        print("--- building Python artifact")
+    def build_poetry_artifact(self):
+        print("--- building artifact with Poetry")
         directory_repository = Directory.repository(self.organization, self.repository)
         directory_environment = Directory.environment(self.organization, self.repository)
         os.system(f"docker run --rm \
@@ -45,18 +45,38 @@ class Repository(object):
             --volume '{directory_environment}:/root/.cache/pypoetry/virtualenvs/' \
             any-build-poetry:latest")
 
-    def _image_tag(self):
+    def _docker_image_tag(self):
         version = self.alt_image_version if self.alt_image_version else self.commit
         return f"ghcr.io/{self.organization}/{self.repository}:{version}".lower()
 
-    def build_image(self):
-        print("--- building Docker image")
+    def build_docker_image(self):
+        print("--- building image with Docker")
         directory_project = Directory.root(self.organization, self.repository)
         image_dockerfile_generator = pkg_resources.as_file(pkg_resources.files("any.resources").joinpath("Dockerfile.image-poetry"))
-        image_tag = self._image_tag()
+        image_tag = self._docker_image_tag()
         with image_dockerfile_generator as image_dockerfile:
             os.system(f"docker build -f '{image_dockerfile}' '{directory_project}' -t '{image_tag}'")
         os.system(f"docker push {image_tag}")
+
+    def _k8s_namespace(self):
+        if branch == "master" or branch == "main":
+            return f"{self.repository}".lower()
+        raise NotImplementedError("Namespaces dedicated to branches are not implemented at this time.")
+
+    def deploy(self):
+        print("--- deploying to Kubernetes")
+        print(f"using KUBECONFIG={ANY_KUBECONFIG}")
+
+        def wrap(command):
+            return f"docker run --rm -v '{ANY_KUBECONFIG}:/.kube/config' bitnami/kubectl:1.27.1 {command}"
+
+        k8s_namespace = self._k8s_namespace()
+        docker_image_tag = self._docker_image_tag()
+        dns_name = f"{self.repository}.release-engineers.com".lower()
+        os.system(wrap(f"create namespace '{k8s_namespace}'"))
+        os.system(wrap(f"create deployment app --image='{docker_image_tag}' --port=8000 --replicas=1 --namespace='{k8s_namespace}'"))
+        os.system(wrap(f"expose deployment app --port=80 --target-port=8000 --name=app --namespace='{k8s_namespace}'"))
+        os.system(wrap(f"create ingress app --class=nginx --rule='{dns_name}/=app:80' --namespace='{k8s_namespace}'"))
 
     def __str__(self):
         return f"{self.organization}/{self.repository}/{self.branch}/{self.commit}"
