@@ -59,7 +59,7 @@ class Repository(object):
         os.system(f"docker push {image_tag}")
 
     def _k8s_namespace(self):
-        if branch == "master" or branch == "main":
+        if self.branch == "master" or self.branch == "main":
             return f"{self.repository}".lower()
         raise NotImplementedError("Namespaces dedicated to branches are not implemented at this time.")
 
