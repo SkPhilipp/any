@@ -72,7 +72,7 @@ class Repository(object):
             tags = [self.docker_image()]
             if additional_tag:
                 tags.append(additional_tag)
-            tags = " ".join([f"-t {tag}" for tag in tags])
+            tags = " ".join([f"-t '{tag}'" for tag in tags])
             os.system(f"docker build -f '{image_dockerfile}' '{directory_project}' {tags}")
 
     def __str__(self):
