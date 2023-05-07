@@ -58,10 +58,10 @@ class Repository(object):
             os.system(f"docker build -f '{image_dockerfile}' '{directory_project}' -t '{image_tag}'")
         os.system(f"docker push {image_tag}")
 
-    def _k8s_namespace(self):
+    def _k8s_name(self):
         if self.branch == "master" or self.branch == "main":
             return f"{self.repository}".lower()
-        raise NotImplementedError("Namespaces dedicated to branches are not implemented at this time.")
+        raise NotImplementedError("Names dedicated to branches are not implemented at this time.")
 
     def deploy(self):
         print("--- deploying to Kubernetes")
@@ -70,13 +70,12 @@ class Repository(object):
         def wrap(command):
             return f"docker run --rm -v '{ANY_KUBECONFIG}:/.kube/config' bitnami/kubectl:1.27.1 {command}"
 
-        k8s_namespace = self._k8s_namespace()
+        k8s_name = self._k8s_name()
         docker_image_tag = self._docker_image_tag()
         dns_name = f"{self.repository}.release-engineers.com".lower()
-        os.system(wrap(f"create namespace '{k8s_namespace}'"))
-        os.system(wrap(f"create deployment app --image='{docker_image_tag}' --port=8000 --replicas=1 --namespace='{k8s_namespace}'"))
-        os.system(wrap(f"expose deployment app --port=80 --target-port=8000 --name=app --namespace='{k8s_namespace}'"))
-        os.system(wrap(f"create ingress app --class=nginx --rule='{dns_name}/=app:80' --namespace='{k8s_namespace}'"))
+        os.system(wrap(f"create deployment '{k8s_name}' --image='{docker_image_tag}' --port=8000 --replicas=1"))
+        os.system(wrap(f"expose deployment '{k8s_name}' --port=80 --target-port=8000 --name='{k8s_name}'"))
+        os.system(wrap(f"create ingress '{k8s_name}' --class=nginx --rule='{dns_name}/={k8s_name}:80'"))
 
     def __str__(self):
         return f"{self.organization}/{self.repository}/{self.branch}/{self.commit}"
