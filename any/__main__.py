@@ -39,7 +39,6 @@ def deploy(organization_repository: str = None, branch: str = None, commit: str 
     local_branch = default_branch(branch)
     local_commit = default_commit(commit)
     repository = Repository(local_organization, local_repository, local_branch, local_commit, tag)
-    repository.reset()
     repository.deploy()
 
 
