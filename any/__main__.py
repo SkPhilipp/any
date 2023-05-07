@@ -30,7 +30,7 @@ def any_build(organization_repository: str = None, branch: str = None, commit: s
     - Builds the project to *.whl using Poetry through Docker, using the `~/.any/` cache folder to store the virtual environment.
     - Builds and pushes the Docker image to GitHub Packages, build is performed using the `~/.any/` cache folder's virtual environment and built *.whl.
 
-    :param organization_repository: GitHub Organization and Repository slug, e.g. `ProductPrinters/any`
+    :param organization_repository: GitHub Organization and Repository slug, e.g. `ProductPrinter/any`
     :param branch: Git branch name
     :param commit: Git commit hash within the given branch
     :param tag: Docker image tag to use instead of the commit hash
@@ -49,7 +49,7 @@ def any_deploy(organization_repository: str = None, branch: str = None, commit: 
     """
     - Deploys to Kubernetes, referring to the Docker image built in `any build`.
 
-    :param organization_repository: GitHub Organization and Repository slug, e.g. `ProductPrinters/any`
+    :param organization_repository: GitHub Organization and Repository slug, e.g. `ProductPrinter/any`
     :param branch: Git branch name
     :param commit: Git commit hash within the given branch
     :param tag: Docker image tag to use instead of the commit hash
