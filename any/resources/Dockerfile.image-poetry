@@ -14,6 +14,9 @@ WORKDIR /app
 ADD environment/*/lib/ /app/lib
 ENV PYTHONPATH=/app/lib/python3.11/site-packages/:$PYTHONPATH
 
+# Workaround to prevent pip from compiling itself after adding the wheel
+RUN python -m pip --version
+
 ADD repository/dist/*.whl /app/dist/
 RUN python -m pip install --no-cache-dir --no-dependencies /app/dist/*.whl
 RUN echo "python -m $(cd /app/dist && ls *.whl | cut -d'-' -f1)" > "/app/entrypoint.sh"
