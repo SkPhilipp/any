@@ -28,7 +28,7 @@ def default_commit(commit: str = None):
     if len(subprocess.check_output("git status --porcelain", shell=True).decode("utf-8").strip()) > 0:
         print("Cannot build from a repository with open changes")
         exit(1)
-    subprocess.check_output("git rev-parse HEAD", shell=True).decode("utf-8").strip()
+    return subprocess.check_output("git rev-parse HEAD", shell=True).decode("utf-8").strip()
 
 
 def any_build(organization_repository: str = None, branch: str = None, commit: str = None, tag: str = None):
