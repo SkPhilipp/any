@@ -47,15 +47,7 @@ Build server CLI tool for getting Git repositories built as Docker images as fas
 
 ## Commands
 
-```bash
-any
-```
-
-Performs the following steps:
-
-- Checks out the repository to the `~/.any/` cache folder.
-- Builds the project to *.whl using Poetry through Docker, using the `~/.any/` cache folder to store the virtual environment.
-- Builds the Docker image instantly, using the `~/.any/` cache folder's virtual environment and built *.whl.
+See `any --help` for more information.
 
 ## Supported Layouts
 
