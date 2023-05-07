@@ -13,7 +13,8 @@ def default_organization_repository(organization_repository: str = None):
     if origin_url.startswith("https://github.com/") and origin_url.endswith(".git"):
         return origin_url[len("https://github.com/"):][:-len(".git")].split("/")
     else:
-        raise Exception(f"Could not parse GitHub organization and repository from origin URL: {origin_url}")
+        print(f"Could not parse GitHub organization and repository from origin URL: {origin_url}")
+        exit(1)
 
 
 def default_branch(branch: str = None):
@@ -21,7 +22,13 @@ def default_branch(branch: str = None):
 
 
 def default_commit(commit: str = None):
-    return commit or subprocess.check_output("git rev-parse HEAD", shell=True).decode("utf-8").strip()
+    if commit:
+        return commit
+    # check for open changes
+    if len(subprocess.check_output("git status --porcelain", shell=True).decode("utf-8").strip()) > 0:
+        print("Cannot build from a repository with open changes")
+        exit(1)
+    subprocess.check_output("git rev-parse HEAD", shell=True).decode("utf-8").strip()
 
 
 def any_build(organization_repository: str = None, branch: str = None, commit: str = None, tag: str = None):
