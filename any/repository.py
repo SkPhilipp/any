@@ -74,6 +74,7 @@ class Repository(object):
         docker_image_tag = self._docker_image_tag()
         dns_name = f"{self.repository}.release-engineers.com".lower()
         os.system(wrap(f"create deployment '{k8s_name}' --image='{docker_image_tag}' --port=8000 --replicas=1"))
+        os.system(wrap(f"set image deployment '{k8s_name}' '*={docker_image_tag}'"))
         os.system(wrap(f"expose deployment '{k8s_name}' --port=80 --target-port=8000 --name='{k8s_name}'"))
         os.system(wrap(f"create ingress '{k8s_name}' --class=nginx --rule='{dns_name}/={k8s_name}:80'"))
 
