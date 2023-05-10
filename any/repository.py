@@ -40,7 +40,7 @@ class Repository(object):
         if self.patch:
             # pipe the patch contents into git apply, writing it to stdin manually from python
             patch_bytes = self.patch.encode("utf-8")
-            subprocess.run(f"git -C '{directory_repository}' apply --allow-empty", input=patch_bytes, shell=True, check=True)
+            subprocess.run(f"git apply --allow-empty", input=patch_bytes, shell=True, check=True, cwd=directory_repository)
 
     def build_poetry_artifact(self):
         print("--- building artifact with Poetry")
