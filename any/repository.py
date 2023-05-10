@@ -39,7 +39,8 @@ class Repository(object):
         os.system(f"git -C '{directory_repository}' reset --hard '{self.commit}'")
         if self.patch:
             # pipe the patch contents into git apply, writing it to stdin manually from python
-            subprocess.run(f"git -C '{directory_repository}' apply --allow-empty", input=self.patch, shell=True, check=True)
+            patch_bytes = self.patch.encode("utf-8")
+            subprocess.run(f"git -C '{directory_repository}' apply --allow-empty", input=patch_bytes, shell=True, check=True)
 
     def build_poetry_artifact(self):
         print("--- building artifact with Poetry")
