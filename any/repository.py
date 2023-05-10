@@ -8,19 +8,21 @@ from any.config import Directory, ANY_KUBECONFIG
 
 
 class Repository(object):
-    def __init__(self, organization, repository, branch, commit, alt_image_version=None):
+    def __init__(self, organization, repository, branch, commit, image_version, patch):
         """
         :param organization: GitHub Organization slug
         :param repository: GitHub Repository slug
         :param branch: Git branch name
         :param commit: Git commit hash within the given branch
-        :param alt_image_version: Alternative Docker image tag version to use for any referenced images, instead of the default (the commit hash)
+        :param image_version: Docker image tag version
+        :param patch: Path file contents to patch into the repository with before building
         """
         self.organization = organization
         self.repository = repository
         self.branch = branch
         self.commit = commit
-        self.alt_image_version = alt_image_version
+        self.docker_image_version = image_version
+        self.patch = patch
 
     def reset(self):
         print("--- resetting Git repository")
@@ -35,6 +37,9 @@ class Repository(object):
         os.system(f"git -C '{directory_repository}' clean -fdx")
         os.system(f"git -C '{directory_repository}' fetch origin '{self.branch}'")
         os.system(f"git -C '{directory_repository}' reset --hard '{self.commit}'")
+        if self.patch:
+            # pipe the patch contents into git apply, writing it to stdin manually from python
+            subprocess.run(f"git -C '{directory_repository}' apply --allow-empty", input=self.patch, shell=True, check=True)
 
     def build_poetry_artifact(self):
         print("--- building artifact with Poetry")
@@ -46,8 +51,7 @@ class Repository(object):
             any-build-poetry:latest")
 
     def _docker_image_tag(self):
-        version = self.alt_image_version if self.alt_image_version else self.commit
-        return f"ghcr.io/{self.organization}/{self.repository}:{version}".lower()
+        return f"ghcr.io/{self.organization}/{self.repository}:{self.docker_image_version}".lower()
 
     def build_docker_image(self):
         print("--- building image with Docker")

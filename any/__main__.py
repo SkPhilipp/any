@@ -6,95 +6,79 @@ import subprocess
 import fire
 
 
-def default_organization_repository(organization_repository: str = None):
-    if organization_repository:
-        return organization_repository.split("/")
-    origin_url = subprocess.check_output("git remote get-url origin", shell=True).decode("utf-8").strip()
-    if origin_url.startswith("https://github.com/") and origin_url.endswith(".git"):
-        return origin_url[len("https://github.com/"):][:-len(".git")].split("/")
-    else:
-        print(f"Could not parse GitHub organization and repository from origin URL: {origin_url}")
-        exit(1)
+class Cli(object):
+    def __init__(self,
+                 organization: str = None,
+                 repository: str = None,
+                 branch: str = None,
+                 tag: str = None,
+                 commit: str = None,
+                 patch: str = None):
+        """
+        :param organization: GitHub Organization slug, e.g. `ProductPrinter`. Defaults to the current repository's organization.
+        :param repository: GitHub Repository slug, e.g. `any`. Defaults to the current repository's name.
+        :param branch: Git branch name. Defaults to the current repository's active branch.
+        :param tag: Docker image tag to use. Defaults to the current repository's HEAD commit hash.
+        :param commit: Git commit hash within the given branch. Defaults to the current repository's HEAD commit hash.
+        :param patch: Path file contents to patch into the repository with before building. Defaults to the output of `git diff`.
+        """
+        self.organization = organization
+        self.repository = repository
+        self.branch = branch
+        self.docker_image_version = tag
+        self.commit = commit
+        self.patch = patch
+        self.executed = []
+        self._setup()
 
+    def _system(self, command: str):
+        return subprocess.check_output(command, shell=True).decode("utf-8").strip()
 
-def default_branch(branch: str = None):
-    return branch or subprocess.check_output("git rev-parse --abbrev-ref HEAD", shell=True).decode("utf-8").strip()
+    def _setup(self):
+        if self.organization is None or self.repository is None:
+            origin_url = self._system("git remote get-url origin")
+            if not origin_url.startswith("https://github.com/") or not origin_url.endswith(".git"):
+                print(f"Could not parse GitHub organization and repository from remote origin: {origin_url}")
+                exit(1)
+            self.organization, self.repository = origin_url[len("https://github.com/"):][:-len(".git")].split("/")
+        if self.branch is None:
+            self.branch = self._system("git rev-parse --abbrev-ref HEAD")
+        if self.commit is None:
+            self.commit = self._system("git rev-parse HEAD")
+        if self.patch is None:
+            self.patch = self._system("git diff")
+        if self.docker_image_version is None:
+            self.docker_image_version = self.commit
 
+    def __str__(self):
+        if self.executed:
+            return f"-- Executed: {', '.join(self.executed)}"
+        return ""
 
-def default_commit(commit: str = None):
-    if commit:
-        return commit
-    # check for open changes
-    if len(subprocess.check_output("git status --porcelain", shell=True).decode("utf-8").strip()) > 0:
-        print("Cannot build from a repository with open changes")
-        exit(1)
-    return subprocess.check_output("git rev-parse HEAD", shell=True).decode("utf-8").strip()
+    def build(self):
+        """
+        Checks out the repository to Any's cache and builds using Poetry and Docker. Note that the Any cache directory contains both the Git repository and
+         the virtual environment used by Poetry. Any Docker images built are pushed to GitHub Packages.
+        """
+        repository = Repository(self.organization, self.repository, self.branch, self.commit, self.docker_image_version, self.patch)
+        repository.reset()
+        repository.build_poetry_artifact()
+        repository.build_docker_image()
+        self.executed.append("build")
+        return self
 
-
-def any_build(organization_repository: str = None, branch: str = None, commit: str = None, tag: str = None):
-    """
-    - Checks out the repository to the `~/.any/` cache folder.
-    - Builds the project to *.whl using Poetry through Docker, using the `~/.any/` cache folder to store the virtual environment.
-    - Builds and pushes the Docker image to GitHub Packages, build is performed using the `~/.any/` cache folder's virtual environment and built *.whl.
-
-    :param organization_repository: GitHub Organization and Repository slug, e.g. `ProductPrinter/any`
-    :param branch: Git branch name
-    :param commit: Git commit hash within the given branch
-    :param tag: Docker image tag to use instead of the commit hash
-    :return:
-    """
-    local_organization, local_repository = default_organization_repository(organization_repository)
-    local_branch = default_branch(branch)
-    local_commit = default_commit(commit)
-    repository = Repository(local_organization, local_repository, local_branch, local_commit, tag)
-    repository.reset()
-    repository.build_poetry_artifact()
-    repository.build_docker_image()
-
-
-def any_deploy(organization_repository: str = None, branch: str = None, commit: str = None, tag: str = None):
-    """
-    - Deploys to Kubernetes, referring to the Docker image built in `any build`.
-
-    :param organization_repository: GitHub Organization and Repository slug, e.g. `ProductPrinter/any`
-    :param branch: Git branch name
-    :param commit: Git commit hash within the given branch
-    :param tag: Docker image tag to use instead of the commit hash
-    :return:
-    """
-    local_organization, local_repository = default_organization_repository(organization_repository)
-    local_branch = default_branch(branch)
-    local_commit = default_commit(commit)
-    repository = Repository(local_organization, local_repository, local_branch, local_commit, tag)
-    repository.deploy()
-
-
-def any_all(organization_repository: str = None, branch: str = None, commit: str = None, tag: str = None):
-    """
-    Equivalent to `any build` followed by `any deploy`.
-
-    :param organization_repository: See `any build`
-    :param branch: See `any build`
-    :param commit: See `any build`
-    :param tag: See `any build`
-    :return:
-    """
-    local_organization, local_repository = default_organization_repository(organization_repository)
-    local_branch = default_branch(branch)
-    local_commit = default_commit(commit)
-    repository = Repository(local_organization, local_repository, local_branch, local_commit, tag)
-    repository.reset()
-    repository.build_poetry_artifact()
-    repository.build_docker_image()
-    repository.deploy()
+    def deploy(self):
+        """
+        Deploys an Any built Docker image to Kubernetes.
+        """
+        repository = Repository(self.organization, self.repository, self.branch, self.commit, self.docker_image_version, self.patch)
+        repository.deploy()
+        self.executed.append("deploy")
+        return self
 
 
 def main():
-    fire.Fire({
-        'build': any_build,
-        'deploy': any_deploy,
-        'all': any_all
-    })
+    fire.Fire(Cli)
 
 
 if __name__ == '__main__':
