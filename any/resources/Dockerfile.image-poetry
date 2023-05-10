@@ -18,7 +18,7 @@ ENV PYTHONPATH=/app/lib/python3.11/site-packages/:$PYTHONPATH
 ENV PYTHONDONTWRITEBYTECODE=1
 
 ADD repository/dist/*.whl /app/dist/
-RUN python -m pip install --no-cache-dir --no-dependencies /app/dist/*.whl
-RUN echo "python -m $(cd /app/dist && ls *.whl | cut -d'-' -f1)" > "/app/entrypoint.sh"
+RUN python -m pip install --no-cache-dir --no-dependencies /app/dist/*.whl && \
+    echo "python -m $(cd /app/dist && ls *.whl | cut -d'-' -f1)" > "/app/entrypoint.sh"
 
 ENTRYPOINT ["bash", "/app/entrypoint.sh"]
