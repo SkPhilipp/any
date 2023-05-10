@@ -28,6 +28,7 @@ class Cli(object):
         self.docker_image_version = tag
         self.commit = commit
         self.patch = patch
+        self.patch_bytes = None
         self.executed = []
         self._setup()
 
@@ -46,7 +47,9 @@ class Cli(object):
         if self.commit is None:
             self.commit = self._system("git rev-parse HEAD")
         if self.patch is None:
-            self.patch = self._system("git diff")
+            self.patch_bytes = subprocess.check_output("git diff")
+        else:
+            self.patch_bytes = self.patch.encode("utf-8")
         if self.docker_image_version is None:
             self.docker_image_version = self.commit
 
@@ -60,7 +63,7 @@ class Cli(object):
         Checks out the repository to Any's cache and builds using Poetry and Docker. Note that the Any cache directory contains both the Git repository and
          the virtual environment used by Poetry. Any Docker images built are pushed to GitHub Packages.
         """
-        repository = Repository(self.organization, self.repository, self.branch, self.commit, self.docker_image_version, self.patch)
+        repository = Repository(self.organization, self.repository, self.branch, self.commit, self.docker_image_version, self.patch_bytes)
         repository.reset()
         repository.build_poetry_artifact()
         repository.build_docker_image()
@@ -71,7 +74,7 @@ class Cli(object):
         """
         Deploys an Any built Docker image to Kubernetes.
         """
-        repository = Repository(self.organization, self.repository, self.branch, self.commit, self.docker_image_version, self.patch)
+        repository = Repository(self.organization, self.repository, self.branch, self.commit, self.docker_image_version, self.patch_bytes)
         repository.deploy()
         self.executed.append("deploy")
         return self

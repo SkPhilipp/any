@@ -8,7 +8,7 @@ from any.config import Directory, ANY_KUBECONFIG
 
 
 class Repository(object):
-    def __init__(self, organization, repository, branch, commit, image_version, patch):
+    def __init__(self, organization, repository, branch, commit, image_version, patch_bytes):
         """
         :param organization: GitHub Organization slug
         :param repository: GitHub Repository slug
@@ -22,7 +22,7 @@ class Repository(object):
         self.branch = branch
         self.commit = commit
         self.docker_image_version = image_version
-        self.patch = patch
+        self.patch_bytes = patch_bytes
 
     def reset(self):
         print("--- resetting Git repository")
@@ -37,10 +37,7 @@ class Repository(object):
         os.system(f"git -C '{directory_repository}' clean -fdx")
         os.system(f"git -C '{directory_repository}' fetch origin '{self.branch}'")
         os.system(f"git -C '{directory_repository}' reset --hard '{self.commit}'")
-        if self.patch:
-            # pipe the patch contents into git apply, writing it to stdin manually from python
-            patch_bytes = self.patch.encode("utf-8")
-            subprocess.run(f"git apply --allow-empty", input=patch_bytes, shell=True, check=True, cwd=directory_repository)
+        subprocess.run(f"git apply --allow-empty", input=self.patch_bytes, shell=True, check=True, cwd=directory_repository)
 
     def build_poetry_artifact(self):
         print("--- building artifact with Poetry")
