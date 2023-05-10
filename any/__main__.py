@@ -47,7 +47,7 @@ class Cli(object):
         if self.commit is None:
             self.commit = self._system("git rev-parse HEAD")
         if self.patch is None:
-            self.patch_bytes = subprocess.check_output("git diff")
+            self.patch_bytes = subprocess.check_output("git diff", shell=True)
         else:
             self.patch_bytes = self.patch.encode("utf-8")
         if self.docker_image_version is None:
