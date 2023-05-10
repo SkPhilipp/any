@@ -37,7 +37,7 @@ class Repository(object):
         os.system(f"git -C '{directory_repository}' clean -fdx")
 
         # don't fetch if the commit is already in the repository
-        if subprocess.check_output(f"git -C '{directory_repository} cat-file -t {self.commit}", shell=True).decode("utf-8").strip() != "commit":
+        if subprocess.check_output(f"git -C '{directory_repository}' cat-file -t '{self.commit}'", shell=True).decode("utf-8").strip() != "commit":
             os.system(f"git -C '{directory_repository}' fetch origin '{self.branch}'")
 
         os.system(f"git -C '{directory_repository}' reset --hard '{self.commit}'")
