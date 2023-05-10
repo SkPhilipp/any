@@ -11,21 +11,21 @@ class Cli(object):
                  organization: str = None,
                  repository: str = None,
                  branch: str = None,
-                 tag: str = None,
+                 docker_image_version: str = None,
                  commit: str = None,
                  patch: str = None):
         """
         :param organization: GitHub Organization slug, e.g. `ProductPrinter`. Defaults to the current repository's organization.
         :param repository: GitHub Repository slug, e.g. `any`. Defaults to the current repository's name.
         :param branch: Git branch name. Defaults to the current repository's active branch.
-        :param tag: Docker image tag to use. Defaults to the current repository's HEAD commit hash.
+        :param docker_image_version: Docker image tag to use. Defaults to the current repository's HEAD commit hash.
         :param commit: Git commit hash within the given branch. Defaults to the current repository's HEAD commit hash.
         :param patch: Path file contents to patch into the repository with before building. Defaults to the output of `git diff`.
         """
         self.organization = organization
         self.repository = repository
         self.branch = branch
-        self.docker_image_version = tag
+        self.docker_image_version = docker_image_version
         self.commit = commit
         self.patch = patch
         self.patch_bytes = None
