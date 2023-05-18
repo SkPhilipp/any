@@ -1,24 +1,16 @@
-# Build: docker build -f Dockerfile.image-poetry -t $repository_id:$commit $repository_root
-FROM python:3.11-slim
+# Build:
+#  docker build -f any/resources/Dockerfile.image-poetry -t $project:$commit $project
+FROM python:3.11-alpine
 
-ENV VENV_PATH=/tmp/venv
-ENV PATH=$VENV_PATH/bin:$PATH
-
-RUN mkdir "$VENV_PATH" \
-    && python3 -m venv "$VENV_PATH" \
-    && "$VENV_PATH/bin/pip" install -U pip setuptools \
-    && "$VENV_PATH/bin/pip" install poetry
+RUN apk add --no-cache unzip
 
 WORKDIR /app
 
-ADD environment/*/lib/ /app/lib
 ENV PYTHONPATH=/app/lib/python3.11/site-packages/:$PYTHONPATH
 
-# prevent Python from writing .pyc files for pip
-ENV PYTHONDONTWRITEBYTECODE=1
+ADD .venv/lib/ /app/lib
+ADD dist/*.whl /app/dist/
 
-ADD repository/dist/*.whl /app/dist/
-RUN python -m pip install --no-cache-dir --no-dependencies /app/dist/*.whl && \
-    echo "python -m $(cd /app/dist && ls *.whl | cut -d'-' -f1)" > "/app/entrypoint.sh"
+RUN unzip -n -q /app/dist/*.whl -d /app/lib/python3.11/site-packages/
 
-ENTRYPOINT ["bash", "/app/entrypoint.sh"]
+ENTRYPOINT ["sh", "-c", "python -m $(cd /app/dist && ls *.whl | cut -d'-' -f1)"]

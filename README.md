@@ -53,5 +53,9 @@ See `any --help` for more information.
 
 ### Python Poetry
 
-Requires a `pyproject.toml` file. Note that standard commands of `poetry export` and `poetry build` are functional, and the built wheel starts with
-the Python module's name.
+Requires a `pyproject.toml` file.
+
+Note;
+- Standard commands of `poetry export` and `poetry build` must be functional
+- The built wheel must start with the Python module's name.
+- The project must use a local virtualenv in .venv (using `poetry config virtualenvs.in-project true`).

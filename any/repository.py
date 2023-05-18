@@ -26,42 +26,38 @@ class Repository(object):
 
     def reset(self):
         print("--- resetting Git repository")
-        directory_repository = Directory.repository(self.organization, self.repository)
-        directory_git = os.path.join(directory_repository, ".git")
+        directory = Directory.root(self.organization, self.repository)
+        directory_git = os.path.join(directory, ".git")
 
         # don't clone already cloned repositories
         if not os.path.isdir(directory_git):
-            os.makedirs(directory_repository, exist_ok=True)
-            os.system(f"git clone 'https://github.com/{self.organization}/{self.repository}.git' '{directory_repository}'")
+            os.makedirs(directory, exist_ok=True)
+            os.system(f"git clone 'https://github.com/{self.organization}/{self.repository}.git' '{directory}'")
 
-        os.system(f"git -C '{directory_repository}' clean -fdx")
+        os.system(f"git -C '{directory}' clean -fdx -e '.venv'")
 
         # don't fetch if the commit is already in the repository
-        if subprocess.check_output(f"git -C '{directory_repository}' cat-file -t '{self.commit}'", shell=True).decode("utf-8").strip() != "commit":
-            os.system(f"git -C '{directory_repository}' fetch origin '{self.branch}'")
+        if subprocess.check_output(f"git -C '{directory}' cat-file -t '{self.commit}'", shell=True).decode("utf-8").strip() != "commit":
+            os.system(f"git -C '{directory}' fetch origin '{self.branch}'")
 
-        os.system(f"git -C '{directory_repository}' reset --hard '{self.commit}'")
-        subprocess.run(f"git apply --allow-empty", input=self.patch_bytes, shell=True, check=True, cwd=directory_repository)
+        os.system(f"git -C '{directory}' reset --hard '{self.commit}'")
+        subprocess.run(f"git apply --allow-empty", input=self.patch_bytes, shell=True, check=True, cwd=directory)
 
     def build_poetry_artifact(self):
         print("--- building artifact with Poetry")
-        directory_repository = Directory.repository(self.organization, self.repository)
-        directory_environment = Directory.environment(self.organization, self.repository)
-        os.system(f"docker run --rm \
-            --volume '{directory_repository}:/app' \
-            --volume '{directory_environment}:/root/.cache/pypoetry/virtualenvs/' \
-            any-build-poetry:latest")
+        directory = Directory.root(self.organization, self.repository)
+        os.system(f"docker run --rm --volume '{directory}:/app' any-build-poetry:latest")
 
     def _docker_image_tag(self):
         return f"ghcr.io/{self.organization}/{self.repository}:{self.docker_image_version}".lower()
 
     def build_docker_image(self):
         print("--- building image with Docker")
-        directory_project = Directory.root(self.organization, self.repository)
+        directory = Directory.root(self.organization, self.repository)
         image_dockerfile_generator = pkg_resources.as_file(pkg_resources.files("any.resources").joinpath("Dockerfile.image-poetry"))
         image_tag = self._docker_image_tag()
         with image_dockerfile_generator as image_dockerfile:
-            os.system(f"docker build -f '{image_dockerfile}' '{directory_project}' -t '{image_tag}'")
+            os.system(f"docker build --file '{image_dockerfile}' --tag '{image_tag}' '{directory}'")
         os.system(f"docker push {image_tag}")
 
     def _k8s_name(self):

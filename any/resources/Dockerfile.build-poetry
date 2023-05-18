@@ -1,0 +1,10 @@
+# Build:
+#  docker build -f any/resources/Dockerfile.build-poetry -t any-build-poetry:latest .
+FROM python:3.11-alpine
+
+RUN pip install setuptools poetry
+RUN poetry config virtualenvs.in-project true
+
+WORKDIR /app
+
+ENTRYPOINT ["sh", "-c", "poetry config virtualenvs.in-project true --local && poetry install && poetry build --format wheel"]
