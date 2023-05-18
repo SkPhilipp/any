@@ -37,7 +37,10 @@ class Repository(object):
         os.system(f"git -C '{directory}' clean -fdx -e '.venv'")
 
         # don't fetch if the commit is already in the repository
-        if subprocess.check_output(f"git -C '{directory}' cat-file -t '{self.commit}'", shell=True).decode("utf-8").strip() != "commit":
+        try:
+            if subprocess.check_output(f"git -C '{directory}' cat-file -t '{self.commit}'", shell=True).decode("utf-8").strip() != "commit":
+                os.system(f"git -C '{directory}' fetch origin '{self.branch}'")
+        except subprocess.CalledProcessError:
             os.system(f"git -C '{directory}' fetch origin '{self.branch}'")
 
         os.system(f"git -C '{directory}' reset --hard '{self.commit}'")
